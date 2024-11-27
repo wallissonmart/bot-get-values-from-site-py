@@ -1,30 +1,40 @@
 import time
-
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-from selenium.webdriver.edge.options import Options as EdgeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
-options = EdgeOptions()
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
-driver = webdriver.Edge(options=options)
+options = FirefoxOptions()
+options.headless = False
 
-valores_passados = []
+driver = webdriver.Firefox(options=options)
 
-driver.get("https://www.zoom.com.br/notebook/notebook-gamer-acer-aspire-nitro-5-an515-57-52lc-intel-core-i5-11400h-15-6-8gb-ssd-512-gb-windows-11-geforce-gtx-1650?_lc=88&searchterm=acer%20%20nitro%20")
+data = []
 
-time.sleep(1)
+driver.get("https://www.magazineluiza.com.br/selecao/ofertasdodia/?filters=promotion---promocao_sazonal_2")
 
-previous = driver.find_element(
-    By.CSS_SELECTOR, "#__next > div.ProductPageBody_ContentBody__De_1M > div.ProductPageBody_GraySection__31ulA > div.ProductPageBody_BlockSectionWrapper__BK4Qx.container-lg > div > div > section.BlockSection_BlockSection__frjNL.OffersListSection_BlockSection__T5HZT.OffersListSection_OffersListSection__NNIAM.BlockSection_BlockSection--AlwaysOpen__c_PI0 > div")
+time.sleep(2)
 
-values = previous.find_elements(
-    By.CSS_SELECTOR, ".Text_Text__h_AF6.Text_MobileHeadingS__Zxam2")
+products = driver.find_elements(By.CSS_SELECTOR, "li.sc-iNIeMn")
 
-for v in values:
-    if v.text != "":
-        valores_passados.append(v.text.split("à")[0])
+for product in products:
+    try:
+        title = product.find_element(By.CSS_SELECTOR, "h2[data-testid='product-title']").text
+    except Exception as e:
+        title = None
 
-# print(valores_passados[::-1])
-print(valores_passados)
+    try:
+        price = product.find_element(By.CSS_SELECTOR, "p[data-testid='price-value']").text
+    except Exception as e:
+        price = None
+
+    try:
+        link = product.find_element(By.CSS_SELECTOR, "a[data-testid='product-card-container']").get_attribute("href")
+    except Exception as e:
+        link = None
+
+    if title and price and link:
+        data.append({"title": title, "price": price, "link": link})
+
+print(data)
 
 driver.quit()
